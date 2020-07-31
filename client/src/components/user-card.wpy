@@ -1,0 +1,274 @@
+<style lang="less">
+    .user-card-inner {
+        position: absolute;
+        width: 100%;
+        box-sizing: border-box;
+        border-radius: 10rpx 20rpx 0 0;
+        height: 100%;
+        background-color: white;
+        background-position: right 60rpx;
+        background-repeat: no-repeat;
+        background-size: 264rpx 224rpx;
+        .close {  
+            height: 64rpx;
+            width: 64rpx;
+            position: absolute;
+            right: 24rpx;
+            top: 24rpx;
+        }
+        .content {
+            font-size: 28rpx;
+        }
+
+        .user-item {
+            display: flex;
+            height: 60rpx;
+            width: 100%;
+            padding-bottom: 20rpx;
+            font-size: 28rpx;
+            align-items: center;
+        }
+        .avatar {
+            width: 180rpx;
+            height: 180rpx;
+            border-radius: 90rpx;
+            border: 4rpx solid #fff;
+            position: absolute;
+            top: -70rpx;
+            left: -92rpx;
+            margin-left: 50vw;
+            background-color: #fff;
+        }
+        .name-section {
+            padding-top: 130rpx;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16rpx;
+            .name {
+                font-weight: bold;
+                margin-right: 15rpx;
+                font-size: 34rpx;
+                line-height: 50rpx;
+            }
+            .level {
+                width: 60rpx;
+                height: 34rpx;
+            }
+        }
+        .position-section {
+            color: #888;
+            text-align: center;
+            line-height: 44rpx;
+            margin-bottom: 16rpx;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            .logo {
+                margin-right: 9rpx;
+                width: 24rpx;
+                height: 30rpx;
+            }
+        }
+        .uin {
+            color: #888;
+            text-align: center;
+            line-height: 42prx;
+            margin-bottom: 40rpx;
+        }
+        .statistics {
+            display: flex;
+            justify-content: space-around;
+            padding-bottom: 60rpx;
+            border-bottom: 1rpx solid #dbdbdb;
+            text-align: center;
+            .actived {
+                font-size: 34rpx;
+                color: #111;
+                line-height: 50rpx;
+                font-weight: bold;
+                margin-bottom: 9rpx;
+            }
+            .normal {
+                color: #888;
+                line-height: 24rpx;
+            }
+        }
+        .action {
+            display: flex;
+            justify-content: space-around;
+            font-size: 32rpx;
+            .item {
+                box-sizing: border-box;
+                line-height: 108rpx;
+                text-align: center;
+                width: 50%;
+                color: #111;
+            }
+            .actived {
+                color: #006EFF;
+            }
+            .line {
+                height: 30rpx;
+                width: 0;
+                border-right: 1rpx solid #dbdbdb;
+                margin-top: 38rpx;
+            }
+        }
+        .bg {
+            position: fixed;
+            width: 100vw;
+            height: 100vh;
+            top: 0;
+        }
+        .wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+    }
+</style>
+
+<template>
+    <view class="user-card-inner" style="background-image:url('/static/images/bg-im.png')">
+        <view class="bg"></view>
+        <view class="wrapper">
+            <image src="/static/images/close.png" class="close" bindtap="hide" />
+            <view class="content">
+                <!-- <view class="content" v-if="status === 'loading'">{{ loadingMsg }}</view>
+                <view class="content" v-else-if="status === 'error'">{{ errorMsg }}</view> -->
+                <img class="avatar" :src="user.userinfo.avatar" />
+                <view class="name-section">
+                    <view class="name">{{ user.userinfo.nick }}</view>
+                    <img class="level" src="/static/images/level-1.png" />
+                </view>
+                <view class="position-section">
+                    <img class="logo" src="/static/images/position.png"/>
+                    <view class="position">{{ user.userinfo.addr || '保密' }}</view>
+                </view>
+                <view class="uin">UIN: 100009689075</view>
+                <view class="statistics">
+                    <view class="item">
+                        <view class="actived">{{ user.follow.count }}</view>
+                        <view class="normal">粉丝数</view>
+                    </view>
+                    <view class="item">
+                        <view class="actived">{{ user.gift.count }}</view>
+                        <view class="normal">礼物数</view>
+                    </view>
+                    <view class="item">
+                        <view class="actived">{{ user.like.count }}</view>
+                        <view class="normal">点赞数</view>
+                    </view>
+                </view>
+                <view class="action">
+                    <view v-if="is_followed" class="item actived" @tap="unFollow">+ 取消关注</view>
+                    <view v-else class="item actived" @tap="follow">+ 点击关注</view>
+                    <view class="line"></view>
+                    <view class="item" @tap="toMainPage">主页</view>
+                </view>
+            </view>
+        </view>
+        
+    </view>
+</template> 
+
+<script>
+    import wepy from '@wepy/core'
+    import { mapState } from '@wepy/redux';
+    import store from '@/store'
+    import Model from '@/model'
+    import { ADD_FOLLOWER, RESET_FOLLOWER, SET_FOLLOWED } from '@/store/types'
+
+    const app = getApp()
+
+    wepy.component({
+        store,
+        props: {
+            userCardId: '',
+        },
+        data: {
+            status: 'loading',
+            giftList: [],
+            loadingMsg: '加载中，请等待...',
+            errorMsg: '加载出错，请重试',
+            is_followed: false,
+            user: {}
+        },
+        methods: {
+            hide() {
+                this.$emit('hide-user-card')
+            },
+
+            async follow() {
+                const from_id = app.userData.id
+                const to_id = this.userCardId
+
+                try {
+                    const data = await Model.follow({ from_id, to_id }) 
+
+                    if (to_id === this.$parent.groupInfo.ownerID) {
+						this.$parent.attention()
+						this.$store.dispatch({ type: SET_FOLLOWED, payload: {
+                            is_followed: true
+                        }})
+                    }
+                    this.user.follow.count++
+                    this.is_followed = true
+                    wx.showToast({ title: '关注成功' })
+                } catch(e) {
+                    wx.showToast({ title: e.message })
+                }
+            },
+
+            async unFollow() {
+                const from_id = app.userData.id
+                const to_id = this.userCardId
+
+                try {
+                    const data = await Model.unFollow({ from_id, to_id }) 
+
+                    if (to_id === this.$parent.groupInfo.ownerID) {
+						this.$parent.cancelAttention()
+						this.$store.dispatch({ type: SET_FOLLOWED, payload: {
+                            is_followed: false
+                        }})
+                    }
+                    this.user.follow.count--
+                    this.is_followed = false
+                    wx.showToast({ title: '取消关注成功' })
+                } catch(e) {
+                    wx.showToast({ title: e.message })
+                }
+            },
+
+            toMainPage() {
+                wx.showToast({ title: "暂未开放", icon: "none" })
+            }
+        },
+        computed: {
+            // ...mapState([ 'follower' ])
+        },
+        watch: {
+            'userCardId': async function(user_id) {
+                try {
+                    if(user_id) {
+						const id = app.userData.id
+                		const user_id = this.userCardId
+                        const data = await Model.getUserInfo({ user_id, id })
+
+                        this.status = 'success'
+                        this.user = data
+                        this.is_followed = data.is_followed
+                    }	
+                } catch(e) {
+                    this.status = 'error'
+                    wx.showToast({ title: e.message })
+                }
+				
+			}
+        },
+        created() {
+        }
+    })
+</script>

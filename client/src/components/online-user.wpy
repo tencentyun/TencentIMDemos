@@ -1,0 +1,185 @@
+<style lang="less">
+    .online-user {
+        position: absolute;
+        width: 100%;
+        box-sizing: border-box;
+        background: white;
+        .title {
+            line-height: 114rpx;
+            padding: 0 24rpx;
+            font-family: PingFangSC-Medium;
+            font-size: 16px;
+            color: #111111;
+            letter-spacing: 0;
+            text-align: left;
+            display: block;
+            border-bottom: 1px solid #DBDBDB;
+        }
+        .close {  
+            height: 64rpx;
+            width: 64rpx;
+            position: absolute;
+            right: 24rpx;
+            top: 24rpx;
+            z-index: 1;
+        }
+    }
+    
+    .user-list {
+        padding: 23rpx;
+        box-sizing: border-box;
+        height: calc(45vh - 122rpx);
+        .user-item {
+            display: flex;
+            height: 60rpx;
+            width: 100%;
+            padding-bottom: 20rpx;
+            font-size: 28rpx;
+            align-items: center;
+        }
+        .avatar {
+            width: 60rpx;
+            height: 60rpx;
+            border-radius: 30rpx;
+            background-color: #888
+        }
+        .level {
+            width: 54rpx;
+            height: 32rpx;
+            margin-left: 14rpx;
+        }
+        .nick {
+            color: #888;
+            margin-left: 14rpx;
+        }
+        .desc {
+            color: #151515;
+            margin-left: 14rpx;
+        }
+        .gift {
+            width: 27rpx;
+            height: 49rpx;
+            margin-left: 14rpx;
+        }
+    }
+    
+</style>
+
+<template>
+    <view class="online-user">
+        <image src="/static/images/close.png" class="close" bindtap="hide" />
+        <tabs 
+        tabs="{{tabs}}" 
+        activeTab="{{activeTab}}" 
+        swiperClass="weui-tabs-swiper"
+        bindtabclick="onTabCLick"
+        bindchange="onChange"
+        activeClass="tab-bar-title__selected"
+        >
+        <!-- <block wx:for="{{tabs}}" wx:key="title">
+            <view class="tab-content" slot="tab-content-{{index}}" > {{item.title}} </view>
+        </block> -->
+            <!-- 礼物榜 -->
+            <view class="tab-content" slot="tab-content-0">
+                <view class="user-list" v-if="status === 'loading'">{{ loadingMsg }}</view>
+                <view class="user-list" v-else-if="status === 'error'">{{ errorMsg }}</view>
+                <scroll-view v-else class="user-list" scroll-y>
+                    <view v-for="item in giftList" :key="item.id" class="user-item" bindtap="showUser(item.from_id)">
+                        <image class="avatar" :src="item.avatar"/>
+                        <image class="level" src="/static/images/level-1.png"/>
+                        <view class="nick">{{ item.nick }}: </view>
+                        <view class="desc">赠送了{{ item.name }}</view>
+                        <image class="gift" :src="item.thumbnail" /> 
+                    </view>
+                </scroll-view>
+            </view>
+            <!-- 在线用户榜 -->
+            <view class="tab-content" slot="tab-content-1">
+                <view class="user-list" v-if="status === 'loading'">{{ loadingMsg }}</view>
+                <view class="user-list" v-else-if="status === 'error'">{{ errorMsg }}</view>
+                <scroll-view v-else class="user-list" scroll-y>
+                    <view v-for="item in onlineList" :key="item.id" class="user-item" bindtap="showUser(item.userID)">
+                        <image class="avatar" :src="item.avatar"/>
+                        <image class="level" src="/static/images/level-1.png"/>
+                        <view class="nick">{{ item.nick || '无名氏' }}</view>
+                    </view>
+                </scroll-view>
+            </view>
+        </tabs>
+    </view>
+</template> 
+
+<script>
+    import wepy from '@wepy/core';
+    import { mapState } from '@wepy/redux';
+    import store from '@/store'
+    import Model from '@/model'
+    import { ADD_FOLLOWER } from '@/store/types'
+
+    wepy.component({
+        store,
+        props: {
+            groupinfo:{}
+        },
+        data: {
+            status: 'loading',
+            giftList: [],
+            onlineList: [],
+            loadingMsg: '加载中，请等待...',
+            errorMsg: '加载出错，请重试',
+            tabs: [],
+            activeTab: 1,
+		},
+        methods: {
+            hide() {
+                this.$emit('hide-online-user')
+            },
+            showUser(user_id) {
+                this.hide()
+                this.$emit('show-user-card', { user_id })
+            },
+            onTabCLick(e) {
+                const index = e.detail.index
+                this.activeTab = index
+            },
+
+            onChange(e) {
+                const index = e.detail.index
+                this.activeTab = index
+            }
+        },
+		computed: {
+        },
+		watch: {
+			'groupinfo': async function(groupinfo) {
+                try {
+                    if (groupinfo.ownerID) {
+                        const giftList = await Model.getGiftListByUser({ user_id: groupinfo.ownerID })
+                        const onlineList = await Model.getOnlineUser({ tls: this.$app.tls })
+                        
+                        this.status = 'success'
+                        this.giftList = giftList 
+                        this.onlineList = onlineList
+                    }
+                } catch (e) {
+                    this.status = 'error'
+                    wx.showToast({ title: e.message || '出错了，请重试' })
+                }
+				
+			}
+        },
+        created(){
+            const titles = ['送礼榜', '在线用户']
+            const tabs = titles.map(item => ({title: item}))
+            this.tabs = tabs
+        }
+    })
+</script>
+
+<config>
+{
+    usingComponents: {
+      'tabs':'./tabs'
+    }
+}
+</config>

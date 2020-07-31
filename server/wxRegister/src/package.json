@@ -1,0 +1,17 @@
+{
+  "name": "wxregister",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "mysql2": "^2.1.0",
+    "qs": "^6.9.3",
+    "superagent": "^5.2.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "scf native invoke --event event.json"
+  },
+  "author": "",
+  "license": "ISC"
+}

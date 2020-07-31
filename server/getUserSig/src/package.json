@@ -1,0 +1,11 @@
+{
+  "name": "getusersig",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "scf native invoke --event event.json"
+  },
+  "author": "",
+  "license": "ISC"
+}

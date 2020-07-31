@@ -1,0 +1,27 @@
+<style lang="less" scoped>
+
+</style>
+
+<template>
+  <view class="page-body">
+    <view class="page-section page-section-gap">
+      <web-view src="https://cloud.tencent.com/product/im"></web-view>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from '@wepy/core'
+  import CONST from '@/common/const'
+
+  const app = getApp()
+  wepy.page({
+  })
+</script>
+
+<config>
+{
+    navigationBarBackgroundColor: '#ffffff',
+    usingComponents: {}
+}
+</config>

@@ -1,0 +1,83 @@
+{
+  "description": "Tentcent IM live-demo-component",
+  "setting": {
+    "urlCheck": false,
+    "es6": false,
+    "postcss": false,
+    "preloadBackgroundData": false,
+    "minified": false,
+    "newFeature": true,
+    "coverView": true,
+    "autoAudits": false,
+    "showShadowRootInWxmlPanel": true,
+    "scopeDataCheck": false,
+    "checkInvalidKey": true,
+    "checkSiteMap": true,
+    "uploadWithSourceMap": true,
+    "compileHotReLoad": false,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    },
+    "useIsolateContext": true,
+    "useCompilerModule": true,
+    "userConfirmedUseCompilerModuleSwitch": false,
+    "packNpmManually": false,
+    "packNpmRelationList": [],
+    "useMultiFrameRuntime": false
+  },
+  "compileType": "miniprogram",
+  "appid": "wx3b91b7aaa809ecf9",
+  "projectname": "live-demo-component",
+  "miniprogramRoot": "weapp/",
+  "simulatorType": "wechat",
+  "simulatorPluginLibVersion": {},
+  "condition": {
+    "search": {
+      "current": -1,
+      "list": []
+    },
+    "conversation": {
+      "current": -1,
+      "list": []
+    },
+    "plugin": {
+      "current": -1,
+      "list": []
+    },
+    "game": {
+      "list": []
+    },
+    "gamePlugin": {
+      "current": -1,
+      "list": []
+    },
+    "miniprogram": {
+      "current": -1,
+      "list": [
+        {
+          "id": 0,
+          "name": "room",
+          "pathName": "pages/room/index",
+          "query": "im_id=@TGS#aWBJLXSGS&room_cover=https://upload-dianshi-1255598498.file.myqcloud.com/owner-cca99e7107aa45123e9514336b0785463757f242.png&room_status=1",
+          "scene": null
+        },
+        {
+          "id": -1,
+          "name": "pages/roomList/index",
+          "pathName": "pages/roomList/index",
+          "query": "",
+          "scene": null
+        },
+        {
+          "id": -1,
+          "name": "pages/webview/index",
+          "pathName": "pages/webview/index",
+          "query": "",
+          "scene": null
+        }
+      ]
+    }
+  }
+}

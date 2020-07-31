@@ -1,0 +1,14 @@
+{
+  "name": "getroomlist",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "scf native invoke --event event.json"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mysql2": "^2.1.0"
+  }
+}

@@ -1,0 +1,237 @@
+<style type="less">
+    .avtar {
+        width: 72rpx;
+        height: 72rpx;
+        display: inline-block;
+        vertical-align: middle;
+        border-radius: 36rpx;
+        overflow: hidden;
+    }
+    .info {
+        display: inline-block;
+        color: #000;
+        vertical-align: middle;
+        padding-left: 10rpx;
+        max-width: 140rpx;
+    }
+    .attention {
+        width: 94rpx;
+        height: 60rpx;
+        background: #FFFFFF;
+        border-radius: 30rpx;
+        border-radius: 30rpx;
+        font-family: PingFangSC-Medium;
+        font-size: 12px;
+        color: #FF5353;
+        letter-spacing: 0;
+        text-align: center;
+        display: inline-block;
+        padding: 0;
+        line-height: 60rpx;
+        vertical-align: middle;
+        position: absolute;
+        top: 10rpx;
+        right: 10rpx;
+    }
+    .an-infos {
+        background: rgba(0, 0, 0, 0.25);
+        border-radius: 40rpx;
+        width: 322rpx;
+        height: 72rpx;
+        padding: 4rpx;
+        position: relative
+    }
+    .an-name {
+        font-family: PingFangSC-Medium;
+        font-size: 12px;
+        color: #FFFFFF;
+        letter-spacing: 0;
+        text-align: left;
+        line-height: 12px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap
+    }
+    .an-fans {
+        font-family: PingFangSC-Regular;
+        font-size: 10px;
+        color: #FFFFFF;
+        letter-spacing: 0;
+        text-align: left;
+        line-height: 10px;
+        margin-top: 10rpx;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap
+    }
+    .info-wrap {
+        padding: 92rpx 22rpx;
+    }
+    .room-id-info {
+        width: 300rpx;
+        height: 24rpx;
+        background: rgba(0, 0, 0, 0.25);
+        border-radius: 40rpx;
+        border-radius: 40rpx;
+        font-family: PingFangSC-Regular;
+        font-size: 10px;
+        color: #FFFFFF;
+        letter-spacing: 0;
+        text-align: center;
+        line-height: 24rpx;
+        padding: 8rpx;
+        margin-top: 10rpx;
+    }
+    .online {
+        width: 157rpx;
+        height: 43rpx;
+        background: rgba(0, 0, 0, 0.25);
+        border-radius: 40rpx;
+        border-radius: 40rpx;
+        font-family: PingFangSC-Regular;
+        font-size: 10px;
+        color: #FFFFFF;
+        letter-spacing: 0;
+        text-align: center;
+        line-height: 43rpx;
+        position: absolute;
+        right: 24rpx;
+        top: 190rpx;
+    }
+    .red-pack {
+        /* background-image: linear-gradient(180deg, #FF9C9C 8%, #F37474 100%); */
+        border-radius: 4rpx;
+        height: 109rpx;
+        width: 83rpx;
+        position: absolute;
+        right: 24rpx;
+        top: 270rpx;
+        z-index: 1000;
+    }
+</style>
+
+<template>
+    <view class="info-wrap">
+        <!-- 主播信息 -->
+        <view class="an-infos" wx:if="{{ ownerInfo && ownerInfo.userinfo }}" @tap="showUser">
+            <image src="{{ ownerInfo.userinfo.avatar }}" class="avtar" />
+            <view class="info">
+                <view class="an-name">{{ ownerInfo.userinfo.nick }}</view>
+                <view class="an-fans">{{ follower.count }}粉丝</view>
+            </view>
+            <button v-if="follower.is_followed" class="attention" @tap.stop="unFollow">已关注</button>
+            <button v-else class="attention" @tap.stop="follow">关注</button>
+        </view>
+        <!-- 直播间信息 -->
+        <view class="room-id-info" wx:if="{{groupinfo&&groupinfo.groupID}}" @tap="showIntroduction">
+            直播间ID：{{groupinfo.groupID}}
+        </view>
+        <view @tap="showOnlineUser" class="online" wx:if="{{groupinfo.memberNum!==undefinded}}">{{groupinfo.memberNum}}人在看</view>
+        <!-- 区域信息 -->
+        <!-- 观看人数信息 -->
+        <!-- 优惠券 -->
+        <image src="/static/images/red-pack.png" class="red-pack" bindtap="coupon"/>
+    </view>
+</template>
+
+<script>
+    import wepy from '@wepy/core'
+    import { mapState } from '@wepy/redux';
+    import store from '@/store'
+    import Model from '@/model'
+    import { ADD_FOLLOWER, RESET_FOLLOWER, SET_FOLLOWED } from '@/store/types'
+
+    const app = getApp()
+    wepy.component({
+        store,
+        props: {
+            userInfo: {},
+            groupinfo: {},
+            ownerInfo: {}
+        },
+        data: {
+            attention: false,
+        },
+        methods: {
+            showUser() {
+              this.$emit('show-user-card', { user_id: this.groupinfo.ownerID })
+            },
+            coupon(){
+                this.$emit('coupon')
+            },
+            _getVarsByKey(arr, key) {
+                var res
+                for (var i = 0; i < arr.length; i++) {
+                    if (arr[i].key === key) {
+                        res = arr[i].value;
+                        break;
+                    }
+                }
+                return res
+            },
+            async follow(e) {
+                try {
+					await Model.follow({
+						from_id: app.userData.id,
+						to_id: this.groupinfo.ownerID
+					})
+					this.$emit('attention')
+					this.$store.dispatch({ type: SET_FOLLOWED, payload: {
+						is_followed: true
+					}})
+                } catch(e) {
+                    wx.showToast({ title: e.message })
+                }
+			},
+			async unFollow(e) {
+                try {
+					await Model.unFollow({
+						from_id: app.userData.id,
+						to_id: this.groupinfo.ownerID
+					})
+					this.$emit('cancel-attention')
+					this.$store.dispatch({ type: SET_FOLLOWED, payload: {
+						is_followed: false
+					}})
+                } catch(e) {
+                    wx.showToast({ title: e.message })
+                }
+            },
+            showIntroduction() {
+              this.$emit('show-introduction')
+            },
+            showOnlineUser() {
+              this.$emit('show-online-user')
+            }
+        },
+        computed: {
+            ...mapState([ 'follower' ])
+        },
+        watch: {
+            async groupinfo(groupinfo, pre) {
+                try {
+                    const user_id = groupinfo.ownerID
+                    const id = this.userInfo.userID
+
+                    if (user_id) {
+						const data = await Model.getUserInfo({ user_id, id })
+						
+						this.ownerInfo = data
+						this.$store.dispatch({ type: SET_FOLLOWED, payload: {
+                            is_followed: data.is_followed
+                        }})
+                        this.$store.dispatch({ type: RESET_FOLLOWER, payload: {
+                            count: data.follow.count
+                        }})
+                    } 
+                } catch(e) {
+                    wx.showToast({ title: e.message })
+                }
+            }
+            
+        },
+        ready() {
+
+        }
+    })
+</script>

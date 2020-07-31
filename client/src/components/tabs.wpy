@@ -1,0 +1,148 @@
+<style lang="less">
+.weui-tabs{
+  width:100%
+}
+.weui-tabs-bar__wrp{
+  width:100%;background:#fff
+}
+.weui-tabs-bar__content{
+  width:100%;
+  white-space:nowrap;
+  line-height: 118rpx;
+  display: flex
+}
+.weui-tabs-bar__item{
+  width: 50%;
+  font-size: 32rpx;
+  text-align: center;
+  color: #888;
+  position: relative;
+}
+.weui-tabs-bar__item:first-child::after {
+  width: 0;
+  height: 30rpx;
+  border-right: 1rpx solid #dbdbdb;
+  top: 43rpx;
+  right: 0;
+  content: '';
+  position: absolute;
+
+}
+.weui-tabs-bar__title{
+  display:inline-block;
+  border-bottom-width:2px;
+  border-bottom-style:solid;
+  border-bottom-color:transparent
+}
+
+.weui-tabs-bar__wrp {
+    border-bottom: 1rpx solid #dbdbdb;
+}
+
+.weui-tabs-swiper {
+    width: 100%;
+    height: calc(45vh - 122rpx);
+}
+
+.tab-content {
+    height: 100px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    padding: 40rpx;
+}
+
+.weui-tabs-bar__title {
+    margin: 0px 10px;
+}
+
+.tab-bar-title__selected {
+    font-weight: bold;
+    color: #333;
+}
+</style>
+
+<template>
+<view class="weui-tabs">
+  <view class="weui-tabs-bar__wrp">
+    <scroll-view scroll-x scroll-into-view="item_{{currentView}}" scroll-with-animation="{{animation}}">
+      <view class="weui-tabs-bar__content">
+        <block wx:for="{{tabs}}" wx:key="title">
+          <view id="item_{{index}}" class="weui-tabs-bar__item" style="background-color: {{tabBackgroundColor}}; color: {{activeTab === index ? tabActiveTextColor : tabInactiveTextColor}};" bindtap="handleTabClick" data-index="{{index}}">
+            <view class="weui-tabs-bar__title {{tabClass}} {{activeTab === index ? activeClass : ''}}" style="border-bottom-color: {{activeTab === index ? tabUnderlineColor : 'transparent'}}">
+              <text class="">{{item.title}}</text>
+            </view>
+          </view>
+        </block>
+      </view>
+    </scroll-view>
+  </view>
+  <swiper class="{{swiperClass}}" current="{{activeTab}}" duration="{{duration}}" >
+    <swiper-item wx:for="{{tabs}}" wx:key="title">
+      <slot name="tab-content-{{index}}"></slot>
+    </swiper-item>
+  </swiper>
+</view>
+</template> 
+
+<script>
+    import wepy from '@wepy/core'
+    import { mapState } from '@wepy/redux';
+    import store from '@/store'
+    import Model from '@/model'
+    import { ADD_FOLLOWER, RESET_FOLLOWER } from '@/store/types'
+
+    const app = getApp()
+
+    wepy.component({
+    options: {
+        addGlobalClass: true,
+        pureDataPattern: /^_/,
+        multipleSlots: true
+    },
+    props: {
+        tabs: { type: Array, value: [] },
+        tabClass: { type: String, value: '' },
+        swiperClass: { type: String, value: '' },
+        activeClass: { type: String, value: '' },
+        tabUnderlineColor: { type: String, value: '#07c160' },
+        tabActiveTextColor: { type: String, value: '#000000' },
+        tabInactiveTextColor: { type: String, value: '#000000' },
+        tabBackgroundColor: { type: String, value: '#ffffff' },
+        activeTab: { type: Number, value: 0 },
+        swipeable: { type: Boolean, value: true },
+        animation: { type: Boolean, value: true },
+        duration: { type: Number, value: 500 }
+    },
+    data: {
+        currentView: 0
+    },
+    observers: {
+        activeTab: function activeTab(_activeTab) {
+            var len = this.data.tabs.length;
+            if (len === 0) return;
+            var currentView = _activeTab - 1;
+            if (currentView < 0) currentView = 0;
+            if (currentView > len - 1) currentView = len - 1;
+            this.setData({ currentView: currentView });
+        }
+    },
+    lifetimes: {
+        created: function created() {}
+    },
+    methods: {
+        handleTabClick: function handleTabClick(e) {
+            var index = e.currentTarget.dataset.index;
+            this.activeTab = index
+        },
+        handleSwiperChange: function handleSwiperChange(e) {
+            var index = e.detail.current;
+            this.activeTab = index 
+            // this.triggerEvent('change', { index: index });
+        }
+    }
+});
+
+</script>

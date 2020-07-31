@@ -1,0 +1,27 @@
+Resources:
+  im_live_prod:
+    Type: 'TencentCloud::Serverless::Namespace'
+    getRoomList:
+      Properties:
+        CodeUri: ./
+        Description: 获取房间列表
+        Environment:
+          Variables:
+            host: '10.0.0.2'
+            user: 'root'
+            port: '3306'
+            password: 'xiaoxingxing9!@#'
+            database: 'IM_LIVE_DEMO_PROD'
+            # host: '127.0.0.1'
+            # user: 'root'
+            # port: '3306'
+            # password: 'xiaoxingxing6.'
+            # database: 'im_scf_demo_local'
+            appid: 'wx3b91b7aaa809ecf9'
+            appsecrete: '698e6624fc04721db2a93e3c338d9872'
+        Handler: index.main_handler
+        MemorySize: 128
+        Timeout: 3
+        Role: QCS_SCFExcuteRole
+        Runtime: Nodejs8.9
+      Type: 'TencentCloud::Serverless::Function'
