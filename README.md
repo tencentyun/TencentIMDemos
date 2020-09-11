@@ -29,7 +29,15 @@
 ### 小程序配置
 
 - 在小程序开发者工具创建项目，目录指向client/，使用自己申请的小程序appid或测试号
-- 打开client/src/commom/const.js，填入appid和IM的sdkappid
+- 打开client/src/commom/const.js，填入上面提到IM的sdkappid，HOST先不填，后面补上
+
+```javascript
+export default {
+    HOST: "",
+    IMSDKAPPID: 123456789
+}
+```
+
 - 设置，`不校验合法域名、web-view、TLS版本及HTTPS证书`
 - 此时接口还无法调通，需要继续设置mysql和serverless
 - 在小程序目录下打开终端，执行依赖安装
@@ -78,8 +86,18 @@ npm run build
 - 录入API网关触发器
   - 创建触发器，选择API网关触发器
   - 选择使用已有的API服务，后续录入的触发器使用同一个API服务（这样服务域名可以保持一致）
-  - 其他选项默认
-  - 测试触发器是否可以跑通
+  - 其他选项默认，保存之后出现访问路径如：
+
+  ``` text
+  https://service-xxxx-123456.gz.apigw.tencentcs.com/release/getRoomList
+  ```
+
+  - 在浏览器打开访问路径，看是否正常返回数据
+  - 回到小程序的client/src/commom/const.js文件，把访问路径前缀填入HOST，如:
+
+  ``` text
+  https://service-xxxx-123456.gz.apigw.tencentcs.com/release
+  ```
 
 ## 运行
 
